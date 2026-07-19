@@ -1,0 +1,82 @@
+name: Release
+
+# Publishes @sference/vercel-provider to npm using trusted publishing (OIDC).
+# No NPM_TOKEN secret: npm exchanges a short-lived token derived from the
+# GitHub Actions OIDC provider. Configure the trusted publisher on npmjs.com
+# once (see repo RELEASE notes / NOTES.md), then cut a GitHub Release.
+#
+# Requires (all enforced by npm):
+#   - npm CLI >= 11.5.1  (we upgrade npm in-band to guarantee this)
+#   - Node    >= 22.14.0 (we use Node 24 LTS)
+#   - GitHub-hosted runner (self-hosted runners are NOT supported)
+#   - permissions.id-token: write  <- enables OIDC token minting
+#   - package.json repository.url matches this repo exactly (case-sensitive)
+#   - workflow filename configured on npm matches this file: release.yml
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: # manual trigger for testing the pipeline (will actually publish!)
+
+# Concurrency: only one release workflow per ref at a time.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # REQUIRED for OIDC trusted publishing
+  contents: read # for actions/checkout
+
+jobs:
+  publish:
+    name: Build, test, and publish to npm
+    runs-on: ubuntu-latest # GitHub-hosted runner required for trusted publishing
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org' # for `npm publish`
+          cache: 'pnpm'
+
+      # Trusted publishing requires npm CLI >= 11.5.1. Node 24 bundles an
+      # 11.x npm, but pin to latest to be safe against an older patch.
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+
+      - name: Verify npm version (trusted publishing needs >=11.5.1)
+        run: npm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      # Dry-run first so a packaging mistake fails the build before we publish.
+      - name: Verify package contents
+        run: npm pack --dry-run
+
+      # Publish with OIDC trusted publishing. Do NOT set NODE_AUTH_TOKEN —
+      # that would force the legacy static-token path. npm auto-detects the
+      # OIDC environment and exchanges a short-lived, workflow-scoped token.
+      # Provenance attestations are generated automatically (public repo +
+      # trusted publishing), so no --provenance flag is needed.
+      - name: Publish to npm
+        run: npm publish

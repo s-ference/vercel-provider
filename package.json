@@ -1,6 +1,6 @@
 {
   "name": "@sference/vercel-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vercel AI SDK v4 provider for the sference managed-inference API (realtime OpenAI-compatible /v1/chat/completions).",
   "type": "module",
   "license": "Apache-2.0",
