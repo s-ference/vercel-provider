@@ -7,8 +7,8 @@ maps it onto the AI SDK v4 spec so `generateText`, `streamText`, `generateObject
 `streamObject`, and agents work out of the box.
 
 > Realtime only in this release. Async (background `/v1/responses` with a
-> `24h` completion window — the only supported value), streams, and batches are
-> served by the Python [`sference-sdk`](https://github.com/s-ference/sference) —
+> `24h` completion window (the only value currently documented)), streams, and
+> batches are served by the Python [`sference-sdk`](https://github.com/s-ference/sference) —
 > a future release will expose them as a separate mode.
 
 ---
@@ -134,9 +134,9 @@ Add a smoke test against `https://api.sference.com` (gated behind
 drift before users do.
 
 ### 5. Future: async / batch / streams mode
-Expose the background `/v1/responses` surface (`24h` completion window — the
-only supported value — plus streams and batches) as a separate mode alongside
-realtime. The Python
+Expose the background `/v1/responses` surface (`24h` completion window (the
+only value currently documented) — plus streams and batches) as a separate mode
+alongside realtime. The Python
 [`sference-sdk`](https://github.com/s-ference/sference) already covers these
 via submit→poll→fetch; the provider would emulate `doGenerate`/`doStream` over
 that lifecycle. Decide the API shape (separate model factory? `providerOptions`
