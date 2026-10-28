@@ -4,7 +4,7 @@ A [Vercel AI SDK](https://ai-sdk.dev) v4 provider for the [sference](https://sfe
 
 sference exposes an OpenAI-compatible `/v1/chat/completions` endpoint with realtime sync and SSE streaming for open-weight models (Qwen, GLM, DeepSeek, Kimi, …). This provider maps that surface onto the AI SDK [`LanguageModelV4`](https://ai-sdk.dev/providers/community-providers/custom-providers) specification, so `generateText`, `streamText`, `generateObject`, `streamObject`, and agents all work out of the box.
 
-> Realtime only. Async (background `/v1/responses` with `15m`/`1h`/`24h` completion windows), streams, and batches are served by the `sference-sdk` Python package and CLI — a future provider release will expose them as a separate mode.
+> Realtime only. Async (background `/v1/responses` with a `24h` completion window (the only value currently documented)), streams, and batches are served by the `sference-sdk` Python package and CLI — a future provider release will expose them as a separate mode.
 
 ## Install
 
